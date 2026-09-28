@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Lina is a premium personal AI assistant built with sleek design, responsiveness, and state-of-the-art interactive experience." />
+  <title>Lina — Personal AI Assistant</title>
+  <!-- Google Fonts for Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome 6 for Consistent Iconography -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <!-- Drag and Drop Overlay Area -->
+  <div class="drag-drop-overlay" id="dragDropOverlay">
+    <div class="drag-drop-content">
+      <div class="drag-icon-pulse">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+      </div>
+      <h2>Drag & Drop Files Here</h2>
+      <p>Release to attach documents, code files, or images</p>
+    </div>
+  </div>
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true"></div>
+
+  <!-- Primary Application Shell -->
+  <div class="app-shell">
+    
+    <!-- Left Sidebar: Main Navigation & Settings -->
+    <aside class="sidebar" id="leftSidebar">
+      <div class="sidebar-top">
+        <button class="icon-btn collapse-btn" data-target="leftSidebar" type="button" aria-label="Collapse Left Sidebar">
+          <i class="fa-solid fa-chevron-left collapse-chevron"></i>
+          <i class="fa-solid fa-bars expand-hamburger"></i>
+        </button>
+        <div class="brand">
+          <div class="brand-icon">L</div>
+          <div class="brand-text">
+            <div class="brand-name">Lina</div>
+            <div class="brand-sub">Assistant</div>
+          </div>
+        </div>
+      </div>
+
+      <nav class="nav-links" aria-label="Main Navigation">
+        <button class="nav-item active" id="newChatBtn" type="button">
+          <i class="fa-regular fa-comment"></i><span>New chat</span>
+        </button>
+        <button class="nav-item" type="button">
+          <i class="fa-regular fa-clock"></i><span>History</span>
+        </button>
+        <button class="nav-item" type="button">
+          <i class="fa-solid fa-layer-group"></i><span>Projects</span>
+        </button>
+        <button class="nav-item" type="button">
+          <i class="fa-solid fa-gear"></i><span>Settings</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <button class="nav-item" type="button">
+          <i class="fa-regular fa-user"></i><span>Profile</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Panel: Topbar, Messages List, Composer -->
+    <main class="main-panel" id="mainPanel">
+      <header class="topbar">
+        <div class="topbar-left">
+          <!-- Hamburger menu to open left sidebar on mobile or collapsed state -->
+          <button class="icon-btn toggle-left-btn" id="toggleLeft" type="button" aria-label="Toggle Navigation Panel">
+            <i class="fa-solid fa-bars-staggered"></i>
+          </button>
+          <div class="topbar-title" id="chatTitle">New chat</div>
+        </div>
+        <div class="topbar-right">
+          <!-- Voice conversation initiation button -->
+          <button class="icon-btn call-mode-btn" id="voiceCallBtn" type="button" aria-label="Start Voice Conversation" title="Voice Conversation">
+            <i class="fa-solid fa-phone"></i>
+          </button>
+          <!-- Workspace panel toggler -->
+          <button class="icon-btn toggle-right-btn" id="toggleRight" type="button" aria-label="Toggle Workspace Panel" title="Toggle Workspace">
+            <i class="fa-solid fa-table-columns"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Chat Stage -->
+      <div class="chat-stage">
+        
+        <!-- Scrollable Message Area -->
+        <div class="messages-container" id="messagesContainer">
+          
+          <!-- Welcome Screen / Empty State -->
+          <div class="welcome-screen" id="welcomeScreen">
+            <div class="welcome-logo">L</div>
+            <h1 id="welcomeTitle">{{massage}}</h1>
+            <p>Ask me to plan, write, summarize, or automate your next task.</p>
+            
+            <div class="suggestions-grid">
+              <button class="suggestion" data-message="Summarize my day in three bullet points" type="button">
+                <i class="fa-solid fa-list-check"></i>
+                <div class="suggestion-text">
+                  <h3>Summarize my day</h3>
+                  <span>Plan in three bullet points</span>
+                </div>
+              </button>
+              <button class="suggestion" data-message="Help me build a clean responsive frontend layout" type="button">
+                <i class="fa-solid fa-code"></i>
+                <div class="suggestion-text">
+                  <h3>Build a UI</h3>
+                  <span>Clean responsive frontend layout</span>
+                </div>
+              </button>
+              <button class="suggestion" data-message="Draft a short professional email for a client" type="button">
+                <i class="fa-regular fa-envelope"></i>
+                <div class="suggestion-text">
+                  <h3>Draft an email</h3>
+                  <span>Short professional text for client</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Dynamic Chat Messages List -->
+          <div class="messages" id="messages"></div>
+
+          <!-- Dynamic Typing and Thinking Indicators -->
+          <div class="indicator-area" id="indicatorArea">
+            <!-- AI Thinking Process (collapsible like DeepSeek/Gemini) -->
+            <div class="thinking-card" id="thinkingIndicator" style="display: none;">
+              <div class="thinking-header" id="toggleThinking">
+                <i class="fa-solid fa-brain brain-pulse"></i>
+                <span>Thinking Process</span>
+                <i class="fa-solid fa-chevron-down thinking-chevron"></i>
+              </div>
+              <div class="thinking-details" id="thinkingDetails">
+                Analyzing request and structuring layout flow...
+              </div>
+            </div>
+
+            <!-- Bouncing dots typing indicator -->
+            <div class="typing-indicator" id="typingIndicator" style="display: none;">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating scroll to bottom button -->
+        <button class="scroll-to-bottom-btn" id="scrollToBottom" type="button" aria-label="Scroll to bottom" title="Scroll to bottom">
+          <i class="fa-solid fa-arrow-down"></i>
+          <span class="scroll-badge" id="scrollBadge" style="display: none;">0</span>
+        </button>
+
+        <!-- Composer Form -->
+        <form class="composer" id="composer" autocomplete="off">
+          <!-- Selected attachments preview shelf -->
+          <div class="attachment-shelf" id="attachmentShelf"></div>
+          
+          <div class="composer-input-wrapper">
+            <!-- Upload Buttons -->
+            <div class="composer-actions-left">
+              <button class="composer-btn" id="uploadFileBtn" type="button" title="Attach Document (PDF, Code, Text)">
+                <i class="fa-solid fa-paperclip"></i>
+              </button>
+              <button class="composer-btn" id="uploadImageBtn" type="button" title="Attach Image">
+                <i class="fa-solid fa-image"></i>
+              </button>
+            </div>
+
+            <!-- Main Input Area -->
+            <textarea id="messageInput" rows="1" placeholder="Message Lina..." aria-label="Type a message to Lina"></textarea>
+
+            <!-- Submit and Voice buttons -->
+            <div class="composer-actions-right">
+              <!-- Voice messaging recording button -->
+              <button class="composer-btn voice-msg-btn" id="voiceMsgBtn" type="button" title="Record Voice Message">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <!-- Primary action button -->
+              <button class="send-btn" id="sendBtn" type="submit" aria-label="Send message" title="Send message">
+                <i class="fa-solid fa-arrow-up"></i>
+              </button>
+              <!-- Stop generation button (visible when generating responses) -->
+              <button class="stop-btn" id="stopBtn" type="button" aria-label="Stop generating" title="Stop generating" style="display: none;">
+                <div class="stop-icon"></div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden inputs for file selections -->
+          <input type="file" id="fileInput" style="display: none;" multiple />
+          <input type="file" id="imageInput" style="display: none;" accept="image/*" multiple />
+        </form>
+      </div>
+    </main>
+
+    <!-- Right Sidebar: Workspace Details -->
+    <aside class="right-sidebar" id="rightSidebar">
+      <div class="sidebar-top">
+        <div class="right-title">Workspace</div>
+        <button class="icon-btn collapse-btn" data-target="rightSidebar" type="button" aria-label="Collapse Workspace Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="right-content">
+        <div class="panel-card">
+          <div class="panel-heading"><i class="fa-regular fa-calendar"></i> Today</div>
+          <ul>
+            <li>09:00 Standup Meeting</li>
+            <li>11:00 Code Architecture Review</li>
+            <li>14:00 Team Alignment Sync</li>
+          </ul>
+        </div>
+        <div class="panel-card">
+          <div class="panel-heading"><i class="fa-regular fa-lightbulb"></i> Quick notes</div>
+          <p>This layout operates at a rigid 100vh using flexbox. It prevents outer page scroll and dynamically shifts weights as panels open and close.</p>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Voice Recorder Overlay UI (hidden by default) -->
+  <div class="voice-overlay" id="voiceOverlay">
+    <div class="voice-overlay-content">
+      <div class="voice-pulse-circle">
+        <i class="fa-solid fa-microphone"></i>
+      </div>
+      <h3>Listening...</h3>
+      <p class="voice-timer">00:00</p>
+      <div class="voice-actions">
+        <button class="voice-btn voice-cancel" id="voiceCancelBtn" type="button">Cancel</button>
+        <button class="voice-btn voice-done" id="voiceDoneBtn" type="button">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="{{ url_for('static',filename='js/script.js') }}"></script>
+</body>
+</html>
